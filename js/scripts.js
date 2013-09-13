@@ -1,86 +1,85 @@
 var Slides = {
-	
-	totalSlides: '',
+    totalSlides: '',
 
-	slideWidth: '',
+    slideWidth: '',
 
-	translateAmount: '',
+    translateAmount: 0,
 
-	currentSlide: 0,
+    currentSlide: 0,
 
-	container: $('#slides'),
+    container: $('#slides'),
 
-	init: function(totalSlides) {
-		if (!totalSlides) throw new Error('Please pass the total number of slides');
-		Slides.totalSlides = ~~totalSlides;
+    init: function(totalSlides) {
+        if (!totalSlides) throw new Error('Please pass the total number of slides');
+        Slides.totalSlides = ~~totalSlides;     // convert to number ie '2' ==> 2
 
-		Slides.loadContent();
-		Slides.setSlideWidth();
-		Slides.keyPress();
+        Slides.loadContent();
+        Slides.setSlideWidth();
+        Slides.keyPress();
 
-		if (/#slide-\d{1,3}/i.test(location.href)) {
-			Slides.current = ~~location.hash.split('-')[1];
-			Slides.goto();
-		}
-	},
+        if (/#slide-\d{1,3}/i.test(location.hash)) {
+            Slides.currentSlide = ~~location.hash.split('-')[1];
+            Slides.goto();
+        }
+    },
 
-	loadContent: function() {			
-		var frag = document.createDocumentFragment(),
-			bit;
-		for (var i = 0; i < Slides.totalSlides; i++) {
-			bit = $('<div id="#slide-' + i + '"></div>')
-				.load('slides/' + i + '.html')[0];
-			frag.appendChild(bit);				
-		}
-		Slides.container.append(frag);
-	},
+    loadContent: function() {
+        Slides.container.hide();    // avoid re-flow
+        for (var i = 0; i < Slides.totalSlides; i++) {
+            $('<div id="#slide-"' + i + '"></div>')
+                .load('slides/' + i + '.html')
+                .appendTo(Slides.container);
+        }
+        Slides.container.show();
+    },
 
-	setSlideWidth: function() {
-		var each = Slides.container.children('div');
-		Slides.slideWidth = each.width() + (parseInt(each.css('margin-right')));
-	},
+    setSlideWidth: function() {
+        var each = Slides.container.children('div');
+        Slides.slideWidth = each.width() + (parseInt(each.css('margin-right'), 10));
+    },
 
-	keyPress: function() {
-		$(document.body).keydown(function(e) {
-			if (e.keyCode === 37 || e.keyCode === 39) {
-				e.preventDefault();
-				(e.keyCode === 39) ? Slides.next() : Slides.prev();
-			}
-		});
-	},
+    keyPress: function() {
+        $(document.body).keydown(function(e) {
+            if (e.keyCode === 37 || e.keyCode === 39) {
+                e.preventDefault();
+                (e.keyCode === 39) ? Slides.next() : Slides.prev();
+            }
+        });
+    },
 
-	next: function() {
-		if (Slides.currentSlide >= Slides.totalSlides - 1) return;
-		Slides.translateAmount -= Slides.slideWidth;
-		++Slides.currentSlide;
-		Slides.updateHash();
-		Slides.animate();
-	},
+    next: function() {
+        if (Slides.currentSlide >= Slides.totalSlides - 1) return;
+        Slides.translateAmount -= Slides.slideWidth;
+        ++Slides.currentSlide;
+        Slides.updateHash();
+        Slides.animate();
+    },
 
-	prev: function() {
-		if (Slides.currentSlide <= 0) return;
-		Slides.translateAmount += Slides.slideWidth;
-		--Slides.currentSlide;
-		Slides.updateHash();
-		Slides.animate();
-	},
+    prev: function() {
+        if (Slides.currentSlide <= 0) return;
+        Slides.translateAmount += Slides.slideWidth;
+        --Slides.currentSlide;
+        Slides.updateHash();
+        Slides.animate();
+    },
 
-	goto: function() {
-		Slides.translateAmount = -Slides.slideWidth * Slides.currentSlide;
-		Slides.animate();
-	},
+    goto: function() {
+        Slides.translateAmount = -Slides.slideWidth * Slides.currentSlide;
+        Slides.animate();
+    },
 
-	animate: function() {
-		Slides
-			.container
-			.children()
-				.css('-webkit-transform', 'translateX(' + Slides.translateAmount + 'px)')
-	},
+    animate: function() {
+        Slides
+            .container
+            .children()
+            .css('-webkit-transform', 'translateX(' + Slides.translateAmount + 'px)')
+    },
 
-	updateHash: function() {
-		location.hash = '#slide-' + Slides.currentSlide;
-	}
+    updateHash: function() {
+        location.hash = '#slide-' + Slides.currentSlide;
+    }
 };
 
 // Let's do this!
-Slides.init(2);
+Slides.init(4);
+
